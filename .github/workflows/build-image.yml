@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       site:
-        description: "Select Site / Project"
+        description: "Select Site"
         required: true
         type: choice
         options:
@@ -22,11 +22,17 @@ on:
           - uat
           - prod
 
+      docker_tag:
+        description: "Docker Tag (Optional)"
+        required: false
+        default: ""
+        type: string
+
 jobs:
   build:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
-    
+
     steps:
       - name: Checkout Selected Branch
         uses: actions/checkout@v4
@@ -38,6 +44,18 @@ jobs:
           echo "BRANCH=${{ inputs.branch }}" >> $GITHUB_ENV
           echo "SITE=${{ inputs.site }}" >> $GITHUB_ENV
           echo "ENV=${{ inputs.environment }}" >> $GITHUB_ENV
+
+      - name: Resolve Docker Tag
+        run: |
+          if [ -n "${{ inputs.docker_tag }}" ]; then
+            TAG="${{ inputs.docker_tag }}"
+          else
+            SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
+            TAG="${{ inputs.site }}-${{ inputs.environment }}-$SHORT_SHA"
+          fi
+
+          echo "DOCKER_TAG=$TAG" >> $GITHUB_ENV
+          echo "✅ Docker tag = $TAG"
 
       - name: Print build info
         run: |
@@ -53,3 +71,22 @@ jobs:
 
           echo "===== SECRETS (masked automatically) ====="
           echo "API_KEY=${{ secrets.API_KEY }}"
+
+      - name: Build Docker Image
+        run: |
+          IMAGE_NAME=my-go-app:$DOCKER_TAG
+
+          docker build \
+            --build-arg ENV=$ENV \
+            -t $IMAGE_NAME .
+
+          echo "✅ Built image: $IMAGE_NAME"
+      
+      - name: Run Container
+        run: |
+          IMAGE_NAME=my-go-app:$DOCKER_TAG
+
+          docker run --rm \
+            -e API_URL="${{ vars.API_URL }}" \
+            -e DEBUG="${{ vars.DEBUG }}" \
+            $IMAGE_NAME
