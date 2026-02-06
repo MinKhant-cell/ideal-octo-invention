@@ -3,17 +3,6 @@ name: Build Image
 on:
   workflow_dispatch:
     inputs:
-      branch:
-        description: "Select branch to build"
-        required: true
-        default: "dev"
-        type: choice
-        options:
-          - main
-          - dev
-          - uat
-          - prod
-
       site:
         description: "Select Site / Project"
         required: true
