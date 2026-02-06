@@ -53,3 +53,12 @@ jobs:
           echo "Building branch: $BRANCH"
           echo "Site: $SITE"
           echo "Environment: $ENV"
+
+      - name: Print Env Values
+        run: |
+          echo "===== ENVIRONMENT VARIABLES ====="
+          echo "API_URL=${{ vars.API_URL }}"
+          echo "DEBUG=${{ vars.DEBUG }}"
+
+          echo "===== SECRETS (masked automatically) ====="
+          echo "API_KEY=${{ secrets.API_KEY }}"
