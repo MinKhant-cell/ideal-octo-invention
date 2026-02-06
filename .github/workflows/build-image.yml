@@ -25,7 +25,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    environment: ${{ inputs.environment }}
+    
     steps:
       - name: Checkout Selected Branch
         uses: actions/checkout@v4
