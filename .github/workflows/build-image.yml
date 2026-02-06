@@ -1,0 +1,55 @@
+name: Build Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Select branch to build"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - main
+          - dev
+          - uat
+          - prod
+
+      site:
+        description: "Select Site / Project"
+        required: true
+        type: choice
+        options:
+          - hospital-a
+          - hospital-b
+          - hospital-c
+
+      environment:
+        description: "Select Environment"
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Selected Branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Set Variables
+        run: |
+          echo "BRANCH=${{ inputs.branch }}" >> $GITHUB_ENV
+          echo "SITE=${{ inputs.site }}" >> $GITHUB_ENV
+          echo "ENV=${{ inputs.environment }}" >> $GITHUB_ENV
+
+      - name: Print build info
+        run: |
+          echo "Building branch: $BRANCH"
+          echo "Site: $SITE"
+          echo "Environment: $ENV"
