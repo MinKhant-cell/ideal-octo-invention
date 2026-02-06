@@ -30,6 +30,7 @@ on:
         options:
           - dev
           - staging
+          - uat
           - prod
 
 jobs:
